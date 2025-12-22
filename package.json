@@ -1,0 +1,20 @@
+{
+  "name": "vue3-bootstrap-xlsx-localstorage",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.3.4",
+    "bootstrap": "^5.3.2",
+    "xlsx": "^0.18.5",
+    "@fortawesome/fontawesome-free": "^6.5.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-vue": "^5.0.0"
+  }
+}
