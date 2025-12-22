@@ -1,30 +1,9 @@
 <template>
-  <div class="container-fluid py-3 min-vh-100">
-    <div class="row h-100" ref="dashboardRow">
-      <!-- Left sidebar menu -->
-      <aside class="col-12 col-md-2 d-flex flex-column" style="position:relative;height:100%" ref="sidebarRef">
-        <div class="d-flex gap-2 mb-3">
-          <button class="btn btn-sm btn-outline-secondary w-100" @click="noop('save')">Save</button>
-          <button class="btn btn-sm btn-outline-secondary w-100" @click="noop('import')">Import</button>
-          <button class="btn btn-sm btn-outline-secondary w-100" @click="noop('export')">Export</button>
-        </div>
-        <div class="menu-flex p-2 mb-3 flex-grow-1">
-          <button v-for="item in menuItems" :key="item.key" class="btn btn-light w-100 my-2 text-start" @click="noop(item.key)">
-            {{ item.label }}
-          </button>
-        </div>
-
-        <div ref="prefWrap" style="position:absolute; left:0; width:100%;">
-          <button ref="prefBtn" class="btn btn-outline-primary w-100 mt-2" @click="noop('preferences')">Preferences</button>
-        </div>
-      </aside>
-
-      <!-- Main content -->
-      <main class="col-12 col-md-10 d-flex flex-column">
-        <div class="row g-3 flex-grow-1" style="overflow:auto;">
+  <div class="container-fluid">
+    <div class="row g-3">
           <div class="col-12 col-lg-3">
-            <div class="card viz-card h-100 p-3 d-flex flex-column">
-              <h6 class="mb-2 text-center w-100">Tasks</h6>
+            <div class="card viz-card h-100 p-3 d-flex flex-column position-relative pt-5">
+              <h6 class="section-header-floating">Tasks</h6>
               <!-- Chart.js donut for tasks -->
               <div class="w-100 d-flex flex-column" style="flex:1; position:relative;">
                 <div class="flex-grow-1 d-flex align-items-center justify-content-center">
@@ -42,11 +21,51 @@
 
           <div class="col-12 col-lg-6">
             <div class="card viz-card h-100 p-4 d-flex flex-column">
-              <h5 class="text-muted text-center w-100">Your Special Moment Is Coming In:</h5>
+              <h5 class="text-muted text-center w-100 mb-4">Your Special Moment Is Coming In:</h5>
               <div class="d-flex align-items-center justify-content-center flex-grow-1">
-                <div class="text-center">
+                <div class="text-center w-100">
                   <div v-if="hasWeddingDate">
-                    <h2 class="display-6 mt-3">{{ countdownText }}</h2>
+                    <div v-if="countdown.reached" class="h2 text-primary">Wedding day is here!</div>
+                    <div v-else class="countdown-container">
+                      <!-- Row 1: Months, Weeks, Days -->
+                      <div class="countdown-row primary-row mb-4">
+                        <div class="countdown-item">
+                          <span class="value">{{ countdown.months }}</span>
+                          <span class="label">months</span>
+                        </div>
+                        <div class="separator invisible">:</div>
+                        <div class="countdown-item">
+                          <span class="value">{{ countdown.weeks }}</span>
+                          <span class="label">weeks</span>
+                        </div>
+                        <div class="separator invisible">:</div>
+                        <div class="countdown-item">
+                          <span class="value">{{ countdown.days }}</span>
+                          <span class="label">days</span>
+                        </div>
+                      </div>
+                      <!-- Row 2: Hours, Minutes, Seconds -->
+                      <div class="countdown-row secondary-row align-items-start">
+                        <div class="countdown-item">
+                          <span class="value">{{ String(countdown.hours).padStart(2, '0') }}</span>
+                          <span class="label">hours</span>
+                        </div>
+                        <div class="separator">:</div>
+                        <div class="countdown-item">
+                          <span class="value">{{ String(countdown.minutes).padStart(2, '0') }}</span>
+                          <span class="label">minutes</span>
+                        </div>
+                        <div class="separator">:</div>
+                        <div class="countdown-item">
+                          <span class="value">{{ String(countdown.seconds).padStart(2, '0') }}</span>
+                          <span class="label">seconds</span>
+                        </div>
+                      </div>
+                      <!-- Wedding Date Label -->
+                      <div class="mt-4 wedding-date-footer">
+                        {{ formattedWeddingDate }}
+                      </div>
+                    </div>
                   </div>
                   <div v-else class="small text-muted mt-3">no wedding date set yet • <a href="#" @click.prevent="goToPreferences">add wedding date</a></div>
                 </div>
@@ -55,12 +74,12 @@
           </div>
 
           <div class="col-12 col-lg-3">
-            <div class="card viz-card h-100 p-3 d-flex flex-column">
-              <h6 class="mb-2 text-center w-100">Invitation Photo</h6>
+            <div class="card viz-card h-100 p-3 d-flex flex-column position-relative pt-5">
+              <h6 class="section-header-floating">Invitation Photo</h6>
               <div class="d-flex align-items-center justify-content-center flex-grow-1">
                 <div class="text-center">
                   <div v-if="hasInvitationImage">
-                    <img :src="state.value.settings.invitationImage" alt="invitation" class="invitation-placeholder mx-auto mb-2" />
+                    <img :src="state?.settings?.invitationImage" alt="invitation" class="invitation-placeholder mx-auto mb-2" />
                   </div>
                   <div v-else class="my-2 small text-muted">no image added yet • <a href="#" @click.prevent="goToPreferences">add invitation image</a></div>
                 </div>
@@ -69,21 +88,25 @@
           </div>
 
           <div class="col-12 col-lg-6" ref="venueCol">
-            <div class="card p-3 thin-card" ref="venueCard" style="position:relative">
-              <div class="venue-inner" style="width:100%">
-                  <h6 class="venue-header">Venue Location</h6>
-                  <div class="venue-body">
-                    <div v-if="hasVenue" class="map-placeholder my-2"></div>
-                    <div v-else class="venue-placeholder small text-muted text-center">no venue location added yet • <a href="#" @click.prevent="goToPreferences">add venue location</a></div>
+            <div class="card p-0 thin-card overflow-hidden" ref="venueCard" style="position:relative">
+              <div class="venue-inner w-100 h-100 d-flex flex-column">
+                  <h6 class="section-header-floating text-truncate" style="max-width: 90%;">
+                    {{ state?.settings?.venue || 'Venue Location' }}
+                  </h6>
+                  <div class="venue-body flex-grow-1 w-100 h-100">
+                    <div v-if="state?.settings?.venueCoords" id="venueMap" style="width: 100%; height: 100%; min-height: 200px;"></div>
+                    <div v-else class="venue-placeholder d-flex align-items-center justify-content-center small text-muted text-center w-100 h-100 p-5">
+                      <span class="mt-4">no venue location added yet • <a href="#" @click.prevent="goToPreferences">add venue location</a></span>
+                    </div>
                   </div>
                 </div>
             </div>
           </div>
 
           <div class="col-12 col-lg-6">
-            <div class="card p-3 thin-card d-flex align-items-center">
+            <div class="card p-3 thin-card d-flex align-items-center position-relative pt-5">
               <div style="width:100%; display:flex; flex-direction:column; height:100%">
-                <h6 class="mb-2">Guests</h6>
+                <h6 class="section-header-floating">Guests</h6>
                 <div class="mb-2">
                   <canvas ref="guestCanvas" class="guest-canvas" width="400" height="40" style="width:100%; height:40px"></canvas>
                 </div>
@@ -100,8 +123,6 @@
           </div>
 
           <!-- bottom spacer (removed Data & tools) -->
-        </div>
-      </main>
     </div>
   </div>
 </template>
@@ -110,19 +131,31 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import { useRouter } from 'vue-router'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import store from '../utils/store'
 
-const state = ref(store.getState())
+// Fix for default marker icons in Vite
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href,
+  iconUrl: new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href,
+  shadowUrl: new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href,
+});
+
+const state = ref(store.getState() || {})
 
 function refresh(s) {
-  state.value = JSON.parse(JSON.stringify(s))
+  if (s) {
+    state.value = JSON.parse(JSON.stringify(s))
+  }
 }
 
 let unsub
 onMounted(() => {
   store.init()
   refresh(store.getState())
-  unsub = store.onChange((s) => { refresh(s); nextTick(() => { alignPreferences(); updateTaskChart(); updateGuestChart() }) })
+  unsub = store.onChange((s) => { refresh(s); nextTick(() => { updateTaskChart(); updateGuestChart(); initDashboardMap() }) })
 })
 onUnmounted(() => { if (unsub) unsub() })
 
@@ -130,29 +163,6 @@ const router = useRouter()
 
 function goToPreferences() {
   router.push('/preferences')
-}
-
-// refs for alignment
-const dashboardRow = ref(null)
-const sidebarRef = ref(null)
-const venueCard = ref(null)
-const prefWrap = ref(null)
-const prefBtn = ref(null)
-
-function alignPreferences() {
-  // align the bottom of the preferences button with bottom of the venue card
-  if (!sidebarRef.value || !venueCard.value || !prefWrap.value || !prefBtn.value) return
-  const sidebarRect = sidebarRef.value.getBoundingClientRect()
-  const venueRect = venueCard.value.getBoundingClientRect()
-  const prefRect = prefBtn.value.getBoundingClientRect()
-  // compute top relative to sidebar (so absolute positioning aligns correctly)
-  const EXTRA_OFFSET = 12 // nudge up a bit to visually align
-  const top = (venueRect.bottom - sidebarRect.top) - prefRect.height - EXTRA_OFFSET
-  prefWrap.value.style.top = Math.max(0, top) + 'px'
-}
-
-function onResize() {
-  nextTick(() => alignPreferences())
 }
 
 const tasksDue = computed(() => {
@@ -215,76 +225,67 @@ const totalGuests = computed(() => {
 })
 
 // countdown
-import { ref as _ref } from 'vue'
-const countdownText = _ref('')
+const countdown = ref({
+  months: 0,
+  weeks: 0,
+  days: 0,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+  reached: false
+})
 
 function updateCountdown() {
   const settings = state.value.settings || {}
   const target = settings.weddingDate ? new Date(settings.weddingDate) : new Date(Date.now() + 1000 * 60 * 60 * 24 * 120)
   const diff = target - Date.now()
+  
   if (diff <= 0) {
-    countdownText.value = 'Wedding date reached'
+    countdown.value.reached = true
     return
   }
-  const days = Math.floor(diff / (1000*60*60*24))
-  const months = Math.floor(days / 30)
-  const weeks = Math.floor((days % 30) / 7)
-  const remDays = Math.floor((days % 30) % 7)
-  const hours = Math.floor((diff / (1000*60*60)) % 24)
-  const minutes = Math.floor((diff / (1000*60)) % 60)
-  const seconds = Math.floor((diff / 1000) % 60)
-  countdownText.value = `${months}months ${weeks} weeks ${remDays} days ${hours} hours ${minutes} minutes ${seconds} seconds`
+  
+  const totalDays = Math.floor(diff / (1000*60*60*24))
+  countdown.value.months = Math.floor(totalDays / 30)
+  countdown.value.weeks = Math.floor((totalDays % 30) / 7)
+  countdown.value.days = Math.floor((totalDays % 30) % 7)
+  countdown.value.hours = Math.floor((diff / (1000*60*60)) % 24)
+  countdown.value.minutes = Math.floor((diff / (1000*60)) % 60)
+  countdown.value.seconds = Math.floor((diff / 1000) % 60)
+  countdown.value.reached = false
 }
 
 let countdownInterval = null
 onMounted(() => {
   updateCountdown()
   countdownInterval = setInterval(updateCountdown, 1000)
-  // align preferences after mount and on resize
-  alignPreferences()
-  window.addEventListener('resize', onResize)
   // create charts after DOM ready
   nextTick(() => {
     createTaskChart()
     createGuestChart()
+    initDashboardMap()
   })
 })
 onUnmounted(() => { if (countdownInterval) clearInterval(countdownInterval) })
-onUnmounted(() => { window.removeEventListener('resize', onResize) })
-
-function noop(name) {
-  // placeholder clickable action
-  // eslint-disable-next-line no-console
-  console.log('noop click', name)
-}
-
-// pie path helper
-function piePath(startFrac, endFrac, cx, cy, r) {
-  // simple conversion to arc path in percentage of circle
-  const startAngle = startFrac * Math.PI * 2 - Math.PI/2
-  const endAngle = endFrac * Math.PI * 2 - Math.PI/2
-  const x1 = cx + Math.cos(startAngle) * (r*30)
-  const y1 = cy + Math.sin(startAngle) * (r*30)
-  const x2 = cx + Math.cos(endAngle) * (r*30)
-  const y2 = cy + Math.sin(endAngle) * (r*30)
-  const large = endFrac - startFrac > 0.5 ? 1 : 0
-  return `M ${cx} ${cy} L ${x1} ${y1} A ${r*30} ${r*30} 0 ${large} 1 ${x2} ${y2} Z`
-}
-
-const menuItems = [
-  { key: 'dashboard', label: 'Dashboard' },
-  { key: 'todo', label: 'To Do List' },
-  { key: 'notes', label: 'Notes' },
-  { key: 'guests', label: 'Guest List' },
-  { key: 'seating', label: 'Seating Chart' },
-  { key: 'contacts', label: 'Contacts & Vendors' },
-  { key: 'budget', label: 'Budget' }
-]
 
 // has venue and invitation helpers
 const hasVenue = computed(() => !!(state.value.settings && state.value.settings.venue))
 const hasInvitationImage = computed(() => !!(state.value.settings && state.value.settings.invitationImage))
 const hasWeddingDate = computed(() => !!(state.value.settings && state.value.settings.weddingDate))
+
+const formattedWeddingDate = computed(() => {
+  const dateStr = state.value.settings?.weddingDate
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  })
+})
 
 // tasks breakdown
 const tasksCount = computed(() => (state.value.tasks || []).length)
@@ -397,10 +398,95 @@ function updateGuestChart() {
   guestChart.update()
 }
 
+// Venue map logic
+let dashboardMap = null
+function initDashboardMap() {
+  const coords = state.value.settings?.venueCoords
+  if (!coords) return
+  
+  if (dashboardMap) {
+    dashboardMap.remove()
+  }
+
+  dashboardMap = L.map('venueMap').setView([coords.lat, coords.lng], 15)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(dashboardMap)
+  
+  L.marker([coords.lat, coords.lng]).addTo(dashboardMap)
+}
+
 
 </script>
 
 <style scoped>
+.countdown-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+.countdown-row {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+.countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 8rem;
+}
+.separator {
+  font-size: 4.0rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #2b2b2b;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+}
+.countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.countdown-item .value {
+  font-weight: 800;
+  line-height: 1;
+}
+.countdown-item .label {
+  color: #6c757d;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* Row 1 sizing */
+.primary-row .value {
+  font-size: 6.5rem;
+}
+.primary-row .separator {
+  font-size: 6.5rem;
+}
+
+/* Row 2 sizing */
+.secondary-row .value {
+  font-size: 4.0rem;
+}
+
+.wedding-date-footer {
+  font-size: 1.1rem;
+  color: #6c757d;
+  font-weight: 400;
+  border-top: 1px solid #eee;
+  padding-top: 1.5rem;
+  width: 100%;
+}
+
 .viz-card{min-height:340px}
 @media (min-width: 992px) {
   .viz-card{min-height:680px}
@@ -430,9 +516,23 @@ function updateGuestChart() {
 .total-guests{font-size:0.95rem;color:#495057;line-height:1}
 .total-guests-number{font-size:1rem;margin-left:8px;color:#2b2b2b;display:inline-block;line-height:1;transform:scale(1.45);transform-origin:center}
 
+.section-header-floating {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 0.25rem 1.25rem;
+  border-radius: 50rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  font-weight: 600;
+  z-index: 10;
+  white-space: nowrap;
+  margin: 0;
+}
+
 /* Venue centering */
-.venue-inner{position:relative;display:flex;flex-direction:column;padding:8px}
-.venue-header{position:absolute;left:0;right:0;top:8px;text-align:center;margin:0;padding:4px 0;font-weight:600}
-.venue-body{position:absolute;left:12px;right:12px;top:44px;bottom:12px;display:flex;align-items:center;justify-content:center}
-.venue-placeholder{padding:6px}
+.venue-inner{position:relative;height:100%;min-height:200px}
+.venue-body{height:100%;width:100%}
+.venue-placeholder{height:100%;min-height:200px}
 </style>

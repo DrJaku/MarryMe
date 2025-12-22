@@ -17,7 +17,12 @@ const defaultState = () => ({
   contacts: [],
   seating: { tables: [] },
   budget: [],
-  settings: { currency: 'USD', locale: 'en', autosave: true },
+  settings: { 
+    currency: 'USD', 
+    locale: 'en', 
+    autosave: true,
+    venueCoords: null // { lat: number, lng: number }
+  },
   activity: []
 })
 
