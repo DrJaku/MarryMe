@@ -24,7 +24,7 @@
           </button>
         </div>
         <button 
-          class="btn btn-sm btn-outline-warning" 
+          class="btn btn-sm btn-outline-info" 
           @click="applyDeadlineSort"
           title="Sort by Deadline"
         >
@@ -39,6 +39,7 @@
     </div>
 
     <!-- Grouped Tasks -->
+     <div class="card shadow-sm border-100 p-4 bg-white">
     <div v-if="categories.length === 0" class="text-center py-5">
       <div class="mb-3 text-muted display-1 opacity-25">
         <i class="fa-solid fa-clipboard-list"></i>
@@ -63,7 +64,7 @@
       >
         <template #item="{ element: task }">
           <div 
-            class="list-group-item list-group-item-action border-start border-4 mb-2 rounded shadow-xs"
+            class="list-group-item list-group-item-action  border-top border-bottom border-5 mb-2 rounded shadow-xs"
             :style="{ borderColor: task.color || '#dee2e6' }"
           >
             <div class="d-flex align-items-center gap-3">
@@ -140,7 +141,7 @@
             </div>
 
             <!-- Subtasks -->
-            <div v-if="task.subtasks && task.subtasks.length > 0" class="ms-5 mt-2 border-start ps-3 py-1">
+            <div v-if="task.subtasks && task.subtasks.length > 0" class="ms-5 mt-2 border-start border-2 ps-3 py-1">
               <div v-for="sub in task.subtasks" :key="sub.id" class="d-flex align-items-center gap-2 mb-1">
                 <input 
                   class="form-check-input small-check" 
@@ -176,6 +177,7 @@
           </div>
         </template>
       </draggable>
+    </div>
     </div>
 
     <!-- Modals -->
@@ -766,7 +768,7 @@ function formatDate(date) {
 
 <style scoped>
 .list-group-item {
-  background-color: var(--secondary-white) !important;
+  background-color: var(--pink-beige) !important;
   color: var(--section-text) !important;
 }
 .cursor-move { cursor: move; }
@@ -774,7 +776,7 @@ function formatDate(date) {
 .small-check { transform: scale(0.85); }
 .task-title { font-size: 1.05rem; }
 .list-group-item:hover { background-color: #fbfbfb; }
-.deadline-warning { color: #fd7e14; } /* Bootstrap Orange */
+.deadline-warning { color: #fd7e14 !important; } /* Bootstrap Orange */
 .cursor-pointer { cursor: pointer; }
 .hover-underline:hover { text-decoration: underline; }
 

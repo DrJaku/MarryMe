@@ -13,6 +13,8 @@ const defaultState = () => ({
   dashboard: { notes: '', lastViewed: null },
   tasks: [],
   taskCategories: ['General', 'Venue', 'Dress', 'Food', 'Guest List'],
+  guestCategories: ['Family', 'Friend', 'Work'],
+  vendorCategories: ['Photographer', 'Producer', 'DJ'],
   notes: [],
   guests: [],
   contacts: [],

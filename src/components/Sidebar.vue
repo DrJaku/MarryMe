@@ -22,7 +22,7 @@
     <div class="px-2 mt-auto">
       <button 
         class="btn w-100 d-flex align-items-center justify-content-center gap-2"
-        :class="route.path === '/preferences' ? 'btn-primary' : 'btn-outline-primary'"
+        :class="route.path === '/preferences' ? 'btn-primary' : 'btn-outline-dark'"
         @click="navigate('/preferences')"
       >
         <i class="fa-solid fa-gear"></i>

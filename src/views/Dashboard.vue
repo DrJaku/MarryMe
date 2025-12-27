@@ -21,42 +21,42 @@
 
           <div class="col-12 col-lg-6">
             <div class="card viz-card h-100 p-4 d-flex flex-column">
-              <h3 class="text-muted text-center w-100 mb-4">Your Special Moment Is Coming In:</h3>
+              <h1 v-if="!countdown.reached"class="text-muted text-center w-100 mb-4 font-fancy">Your Special Moment Is Coming In:</h1>
               <div class="d-flex align-items-center justify-content-center flex-grow-1">
                 <div class="text-center w-100">
                   <div v-if="hasWeddingDate">
-                    <div v-if="countdown.reached" class="h2 text-primary">Wedding day is here!</div>
+                    <div v-if="countdown.reached" class="h1 text-muted font-fancy" style="font-size: 4.75em;">Wedding day is here!</div>
                     <div v-else class="countdown-container">
                       <!-- Row 1: Months, Weeks, Days -->
                       <div class="countdown-row primary-row mb-4">
-                        <div class="countdown-item">
+                        <div class="countdown-item font-techno">
                           <span class="value">{{ countdown.months }}</span>
                           <span class="label">months</span>
                         </div>
                         <div class="separator invisible">:</div>
-                        <div class="countdown-item">
+                        <div class="countdown-item font-techno">
                           <span class="value">{{ countdown.weeks }}</span>
                           <span class="label">weeks</span>
                         </div>
                         <div class="separator invisible">:</div>
-                        <div class="countdown-item">
+                        <div class="countdown-item font-techno">
                           <span class="value">{{ countdown.days }}</span>
                           <span class="label">days</span>
                         </div>
                       </div>
                       <!-- Row 2: Hours, Minutes, Seconds -->
                       <div class="countdown-row secondary-row align-items-start">
-                        <div class="countdown-item">
+                        <div class="countdown-item font-techno">
                           <span class="value">{{ String(countdown.hours).padStart(2, '0') }}</span>
                           <span class="label">hours</span>
                         </div>
                         <div class="separator">:</div>
-                        <div class="countdown-item">
+                        <div class="countdown-item font-techno">
                           <span class="value">{{ String(countdown.minutes).padStart(2, '0') }}</span>
                           <span class="label">minutes</span>
                         </div>
                         <div class="separator">:</div>
-                        <div class="countdown-item">
+                        <div class="countdown-item font-techno">
                           <span class="value">{{ String(countdown.seconds).padStart(2, '0') }}</span>
                           <span class="label">seconds</span>
                         </div>
@@ -330,7 +330,7 @@ function createTaskChart() {
   // if all zeros, show an empty gray donut visually but keep breakdown values as 0
   const total = data.reduce((s, n) => s + n, 0)
   const displayData = total === 0 ? [1, 0] : data
-  const colors = total === 0 ? ['#e9ecef', '#f8f9fA'] : ['#ff6384', '#36a2eb']
+  const colors = total === 0 ? ['#e9ecef', '#f8f9fA'] : ['#F6AD7B', '#C2E8CE']
   taskChart = new Chart(ctx, {
     type: 'doughnut',
     data: {
