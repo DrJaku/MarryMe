@@ -5,6 +5,7 @@ import Preferences from '../views/Preferences.vue'
 import TodoList from '../views/TodoList.vue'
 import GuestList from '../views/GuestList.vue'
 import VendorList from '../views/VendorList.vue'
+import Notes from '../views/Notes.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -13,6 +14,7 @@ const routes = [
   { path: '/preferences', name: 'Preferences', component: Preferences },
   { path: '/todo', name: 'Todo', component: TodoList },
   { path: '/guests', name: 'Guests', component: GuestList },
+  { path: '/notes', name: 'Notes', component: Notes },
   { path: '/contacts', name: 'Vendors', component: VendorList }
 ]
 
