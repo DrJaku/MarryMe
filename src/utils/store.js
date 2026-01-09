@@ -20,11 +20,19 @@ const defaultState = () => ({
   contacts: [],
   seating: { tables: [] },
   budget: [],
+  budgetCategories: [
+    { name: 'Venue', budget: 0 },
+    { name: 'Food & Drinks', budget: 0 },
+    { name: 'Attire', budget: 0 },
+    { name: 'Photography', budget: 0 },
+    { name: 'Music', budget: 0 }
+  ],
   settings: { 
-    currency: 'USD', 
-    locale: 'en', 
+    currency: 'ILS', 
+    locale: 'he-IL', 
     autosave: true,
-    venueCoords: null // { lat: number, lng: number }
+    venueCoords: null, // { lat: number, lng: number }
+    weddingBudget: 0
   },
   activity: []
 })

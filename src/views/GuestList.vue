@@ -315,7 +315,7 @@
               </draggable>
               
               <!-- Other (Undeletable) -->
-              <div class="list-group-item d-flex align-items-center gap-3 bg-transparent bg-opacity-50">
+              <div class="list-group-item d-flex align-items-center gap-3 bg-white border-top-0">
                 <!-- <div class="text-muted opacity-25" style="cursor: not-allowed">
                   <i class="fa-solid fa-grip-vertical"></i>
                 </div> -->

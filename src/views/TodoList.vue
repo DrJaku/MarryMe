@@ -300,7 +300,7 @@
                 </template>
               </draggable>
               <!-- Permanent Uncategorized -->
-              <div class="list-group-item d-flex align-items-center gap-3 bg-light bg-opacity-50 border-top-0">
+              <div class="list-group-item d-flex align-items-center gap-3 bg-white border-top-0">
                 <div class="text-muted opacity-25" style="cursor: not-allowed">
                   <i class="fa-solid fa-grip-vertical"></i>
                 </div>
@@ -779,6 +779,11 @@ function formatDate(date) {
 .deadline-warning { color: #fd7e14 !important; } /* Bootstrap Orange */
 .cursor-pointer { cursor: pointer; }
 .hover-underline:hover { text-decoration: underline; }
+
+#manageCategoriesModal .list-group-item {
+  background-color: #ffffff !important;
+  color: inherit !important;
+}
 
 /* Circle Color Picker */
 .color-picker-wrapper {

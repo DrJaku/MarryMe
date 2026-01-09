@@ -6,6 +6,8 @@ import TodoList from '../views/TodoList.vue'
 import GuestList from '../views/GuestList.vue'
 import VendorList from '../views/VendorList.vue'
 import Notes from '../views/Notes.vue'
+import BudgetList from '../views/Budget.vue'
+import SeatingChart from '../views/SeatingChart.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -15,7 +17,9 @@ const routes = [
   { path: '/todo', name: 'Todo', component: TodoList },
   { path: '/guests', name: 'Guests', component: GuestList },
   { path: '/notes', name: 'Notes', component: Notes },
-  { path: '/contacts', name: 'Vendors', component: VendorList }
+  { path: '/seating', name: 'Seating', component: SeatingChart },
+  { path: '/contacts', name: 'Vendors', component: VendorList },
+  { path: '/budget', name: 'Budget', component: BudgetList }
 ]
 
 const router = createRouter({

@@ -5,7 +5,10 @@
   <div v-else class="container-fluid overflow-hidden">
     <div class="row flex-nowrap">
       <Sidebar />
-      <main class="col py-3 min-vh-100 overflow-auto">
+      <main 
+        class="col min-vh-100 overflow-auto"
+        :class="route.path === '/seating' ? 'p-0' : 'py-3'"
+      >
         <router-view />
       </main>
     </div>

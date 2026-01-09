@@ -20,6 +20,22 @@
                 <div class="form-text">This will be used for the countdown on your dashboard.</div>
               </div>
 
+              <!-- Total Wedding Budget -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">Total Wedding Budget</label>
+                <div class="input-group">
+                  <span class="input-group-text">₪</span>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    v-model.number="settings.weddingBudget"
+                    placeholder="e.g. 20000"
+                    min="0"
+                  >
+                </div>
+                <div class="form-text">Set your overall target budget for the wedding.</div>
+              </div>
+
               <!-- Invitation Image URL -->
               <div class="mb-4">
                 <label class="form-label fw-bold">Invitation Image URL</label>
@@ -42,6 +58,7 @@
                   placeholder="Enter the name of your wedding venue"
                 ></textarea>
                 
+                <label class="form-label fw-bold mt-2">Venue Location</label>
                 <div class="map-picker-container border rounded bg-light overflow-hidden">
                   <div class="p-2 bg-white border-bottom d-flex gap-2">
                     <input 
@@ -145,7 +162,8 @@ const settings = ref({
   weddingDate: '',
   invitationImage: '',
   venue: '',
-  venueCoords: null
+  venueCoords: null,
+  weddingBudget: 0
 })
 
 // Leaflet map logic
@@ -236,7 +254,8 @@ onMounted(() => {
       weddingDate: state.settings.weddingDate || '',
       invitationImage: state.settings.invitationImage || '',
       venue: state.settings.venue || '',
-      venueCoords: state.settings.venueCoords || null
+      venueCoords: state.settings.venueCoords || null,
+      weddingBudget: state.settings.weddingBudget || 0
     }
     settings.value = JSON.parse(JSON.stringify(saved))
     initialSettings.value = JSON.parse(JSON.stringify(saved))
