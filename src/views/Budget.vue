@@ -260,17 +260,17 @@
               <div 
                 class="progress-bar" 
                 role="progressbar" 
-                :style="{ width: Math.min(100, (totalEstimatedCosts / weddingBudget) * 100) + '%' }"
-                :class="totalEstimatedCosts > weddingBudget ? 'bg-danger' : 'bg-success'"
+                :style="{ width: Math.min(100, (totalCalculated / weddingBudget) * 100) + '%' }"
+                :class="totalCalculated > weddingBudget ? 'bg-danger' : 'bg-success'"
               ></div>
             </div>
           </div>
           <h5 class="mb-0">
             Total out of wedding budget: 
-            <span :class="totalEstimatedCosts > weddingBudget ? 'text-danger' : 'text-success'">
-              {{ formatCurrency(weddingBudget) }} / {{ formatCurrency(totalEstimatedCosts) }}
+            <span :class="totalCalculated > weddingBudget ? 'text-danger' : 'text-success'">
+              {{ formatCurrency(weddingBudget) }} / {{ formatCurrency(totalCalculated) }}
             </span>
-            <small class="text-muted ms-0 me-2">({{ Math.round((totalEstimatedCosts / weddingBudget) * 100) }}%)</small>
+            <small class="text-muted ms-0 me-2">({{ Math.round((totalCalculated / weddingBudget) * 100) }}%)</small>
           </h5>
         </div>
       </div>
@@ -396,8 +396,8 @@ const filters = ref({
 
 const statusFilterOptions = [
   { label: 'All', value: 'all' },
-  { label: 'Paid', value: 'paid' },
-  { label: 'Unpaid', value: 'unpaid' }
+  { label: 'Entirely Paid', value: 'paid' },
+  { label: 'Payment Due', value: 'due' }
 ]
 
 const newCategoryName = ref('')
@@ -422,7 +422,19 @@ const filteredExpenses = computed(() => {
   return expenses.value.filter(e => {
     const searchMatch = e.name.toLowerCase().includes(filters.value.search.toLowerCase())
     const categoryMatch = filters.value.category === 'all' || e.category === filters.value.category
-    const statusMatch = filters.value.status === 'all' || e.status === filters.value.status
+    const statusMatch = (() => {
+  if (filters.value.status === 'all') return true
+
+  if (filters.value.status === 'paid') {
+    return e.paymentStatus === 'paid'
+  }
+
+  if (filters.value.status === 'due') {
+    return e.paymentStatus !== 'paid'
+  }
+
+  return true
+})()
     return searchMatch && categoryMatch && statusMatch
   })
 })

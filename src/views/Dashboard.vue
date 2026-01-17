@@ -79,7 +79,7 @@
               <div class="d-flex align-items-center justify-content-center flex-grow-1">
                 <div class="text-center">
                   <div v-if="hasInvitationImage">
-                    <img :src="state?.settings?.invitationImage" alt="invitation" class="invitation-placeholder mx-auto mb-2" />
+                    <img :src="state?.settings?.invitationImage" alt="invitation" class="invitation-placeholder mx-auto mb-2" style="object-fit: cover; max-width: 100%; max-height: 100%; width: 100%; height: 100%;" />
                   </div>
                   <div v-else class="my-2 small text-muted">no image added yet • <a href="#" @click.prevent="goToPreferences">add invitation image</a></div>
                 </div>
@@ -330,11 +330,11 @@ function createTaskChart() {
   // if all zeros, show an empty gray donut visually but keep breakdown values as 0
   const total = data.reduce((s, n) => s + n, 0)
   const displayData = total === 0 ? [1, 0] : data
-  const colors = total === 0 ? ['#e9ecef', '#f8f9fA'] : ['#F6AD7B', '#C2E8CE']
+  const colors = total === 0 ? ['#e9ecef', '#f8f9fA'] : ['lightcoral', '#C2E8CE']
   taskChart = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Todo', 'Done'],
+      labels: ['To do', 'Done'],
       datasets: [{ data: displayData, backgroundColor: colors, borderWidth: 2, borderColor: '#dee2e6' }]
     },
     options: {
