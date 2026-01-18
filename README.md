@@ -1,6 +1,6 @@
-# Vue 3 + Bootstrap + XLSX Demo
+# SoEngaged - A Simple But Powerful Wedding Planner
 
-Lightweight frontend-only scaffold using Vite, Vue 3, Bootstrap and FontAwesome. Includes example support for saving to `localStorage` and importing/exporting JSON and XLSX files.
+Lightweight frontend-only wedding planner app using Vite, Vue 3, Bootstrap and FontAwesome. Includes example support for saving to `localStorage` and importing/exporting JSON and XLSX files.
 
 Quickstart
 
@@ -32,7 +32,7 @@ npm install
 npm run dev
 ```
 
-- Build production (output goes to `docs/` for GitHub Pages):
+- Build production:
 
 ```bash
 npm run build
@@ -43,7 +43,7 @@ npm run build
 ```bash
 npm run preview
 # or with a static server:
-npx serve -s docs -l 5000
+npx serve -s dist -l 5000
 ```
 
 Notes
@@ -66,19 +66,12 @@ Recommended VS Code extensions and tools
 
 Publishing to GitHub Pages
 
-This scaffold outputs a production build into the `docs` folder, which makes it easy to publish on GitHub Pages from the `main` branch (Repository Settings → Pages → Source: `main` / `docs` folder).
+This project is configured to deploy automatically via **GitHub Actions** (see `.github/workflows/deploy.yml`). 
 
-Typical publish flow:
+### Deployment Steps:
+1. Push your changes to the `main` branch.
+2. Go to your GitHub Repository **Settings** > **Pages**.
+3. Under **Build and deployment** > **Source**, select **GitHub Actions**.
 
-```bash
-npm run build
-git add docs
-git commit -m "chore: build for github pages"
-git push origin main
-# then enable Pages in the repo settings (or confirm it's enabled)
-```
-
-Notes:
-- The Vite config uses a relative `base: './'` so the app works when served from the `docs` folder or from a subpath. If you prefer serving from a repository subpath (like `https://username.github.io/repo/`), set `base: '/repo/'` in `vite.config.js` before building.
-- If you'd rather publish via a `gh-pages` branch, remove `outDir: 'docs'` and use a deploy tool like `gh-pages` or GitHub Actions.
+The site will be deployed automatically whenever you push to `main`.
 
