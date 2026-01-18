@@ -112,12 +112,43 @@
                 </div>
 
                 <div class="mt-auto guest-counts-wrap">
-                  <div class="text-center"><div class="small text-muted">Unlikely</div><div class="guest-count-number"><strong :style="{color: '#e74c3c'}">{{ guestCounts[0] }}</strong></div></div>
-                  <div class="text-center"><div class="small text-muted">Likely</div><div class="guest-count-number"><strong :style="{color: '#f1c40f'}">{{ guestCounts[1] }}</strong></div></div>
-                  <div class="text-center"><div class="small text-muted">Definitely</div><div class="guest-count-number"><strong :style="{color: '#196f3d'}">{{ guestCounts[2] }}</strong></div></div>
-                  <div class="text-center"><div class="small text-muted">Confirmed</div><div class="guest-count-number"><strong :style="{color: '#27ae60'}">{{ guestCounts[3] }}</strong></div></div>
+                  <div class="text-center">
+                    <div class="small text-muted">Unlikely</div>
+                    <div class="guest-count-number">
+                      <strong :style="{color: '#e74c3c'}">{{ guestStats.unlikely.main }}</strong>
+                      <span class="small-extras" :style="{color: '#e74c3c'}">+{{ guestStats.unlikely.extras }}</span>
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <div class="small text-muted">Likely</div>
+                    <div class="guest-count-number">
+                      <strong :style="{color: '#f1c40f'}">{{ guestStats.likely.main }}</strong>
+                      <span class="small-extras" :style="{color: '#f1c40f'}">+{{ guestStats.likely.extras }}</span>
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <div class="small text-muted">Definitely</div>
+                    <div class="guest-count-number">
+                      <strong :style="{color: '#196f3d'}">{{ guestStats.definitely.main }}</strong>
+                      <span class="small-extras" :style="{color: '#196f3d'}">+{{ guestStats.definitely.extras }}</span>
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <div class="small text-muted">Confirmed</div>
+                    <div class="guest-count-number">
+                      <strong :style="{color: '#27ae60'}">{{ guestStats.confirmed.main }}</strong>
+                      <span class="small-extras" :style="{color: '#27ae60'}">+{{ guestStats.confirmed.extras }}</span>
+                    </div>
+                  </div>
                 </div>
-                <div class="text-center mt-2 total-guests">Total Guests Invited: <strong class="total-guests-number">{{ totalGuests }}</strong></div>
+                <div class="text-center mt-2 total-guests">
+                  Total Guests Invited: 
+                  <span class="total-guests-number">
+                    {{ guestStats.total.main }}
+                    <span class="small fw-normal opacity-75"> +{{ guestStats.total.extras }}</span>
+                    <strong class="ms-1">= {{ totalGuests }}</strong>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -197,15 +228,47 @@ const pendingPayments = computed(() => {
   return items.filter(it => !it.paid).length
 })
 
-// guest counts (support four types: unlikely, likely, definitely, confirmed)
-const guestCounts = computed(() => {
+// guest stats including extras
+const guestStats = computed(() => {
   const guests = state.value.guests || []
-  if (guests.length === 0) return [0,0,0,0]
-  const unlikely = guests.filter(g => g && g.rsvp === 'unlikely').length
-  const likely = guests.filter(g => g && g.rsvp === 'likely').length
-  const definitely = guests.filter(g => g && g.rsvp === 'definitely').length
-  const confirmed = guests.filter(g => g && (g.rsvp === 'confirmed' || g.rsvp === 'yes')).length
-  return [unlikely, likely, definitely, confirmed]
+  
+  const getCountsForRSVP = (rsvpTypes) => {
+    const subset = guests.filter(g => g && rsvpTypes.includes(g.rsvp))
+    return {
+      main: subset.length,
+      extras: subset.reduce((acc, g) => acc + (Number(g.extras) || 0), 0)
+    }
+  }
+
+  const unlikely = getCountsForRSVP(['unlikely'])
+  const likely = getCountsForRSVP(['likely'])
+  const definitely = getCountsForRSVP(['definitely'])
+  const confirmed = getCountsForRSVP(['confirmed', 'yes'])
+
+  const totalMain = guests.length
+  const totalExtras = guests.reduce((acc, g) => acc + (Number(g.extras) || 0), 0)
+
+  return {
+    unlikely,
+    likely,
+    definitely,
+    confirmed,
+    total: {
+      main: totalMain,
+      extras: totalExtras
+    }
+  }
+})
+
+// for chart.js (using total people: main + extras)
+const guestCounts = computed(() => {
+  const s = guestStats.value
+  return [
+    s.unlikely.main + s.unlikely.extras,
+    s.likely.main + s.likely.extras,
+    s.definitely.main + s.definitely.extras,
+    s.confirmed.main + s.confirmed.extras
+  ]
 })
 
 const guestPercent = computed(() => {
@@ -220,8 +283,8 @@ const guestPercent = computed(() => {
 })
 
 const totalGuests = computed(() => {
-  const counts = guestCounts.value || [0,0,0,0]
-  return counts.reduce((s,n) => s + (Number(n) || 0), 0)
+  const s = guestStats.value.total
+  return s.main + s.extras
 })
 
 // countdown
@@ -510,11 +573,12 @@ function initDashboardMap() {
 .guest-counts-wrap > .text-center{flex:1}
 .guest-counts{font-size:1.1rem}
 .guest-count-number strong{font-size:1.2rem}
+.small-extras { font-size: 0.8rem; opacity: 0.8; font-weight: normal; margin-left: 1px; }
 .guest-canvas{display:block}
 
 /* Total guests styling */
-.total-guests{font-size:0.95rem;color:#495057;line-height:1}
-.total-guests-number{font-size:1rem;margin-left:8px;color:#2b2b2b;display:inline-block;line-height:1;transform:scale(1.45);transform-origin:center}
+.total-guests{font-size:0.95rem;color:#495057;line-height:1.5}
+.total-guests-number{font-size:1.1rem;margin-left:8px;color:#2b2b2b;display:inline-block;line-height:1}
 
 .section-header-floating {
   position: absolute;

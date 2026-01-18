@@ -34,8 +34,8 @@
           <!-- Tables List Tab -->
           <div v-if="activeTab === 'tables'" class="h-100 d-flex flex-column">
             <div class="d-flex align-items-center justify-content-between mb-3 px-1">
-              <h5 class="mb-0 fw-bold text-muted">Tables ({{ tables.length }})</h5>
-              <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" @click="addNewTable">
+              <h5 class="mb-0 fw-bold text-muted">Tables ({{ actualTables.length }})</h5>
+              <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" @click="addNewTable()">
                 <i class="fa-solid fa-plus me-1"></i> Add Table
               </button>
             </div>
@@ -43,7 +43,7 @@
             <div class="tables-scroll-container pb-4">
               <div class="d-inline-flex gap-2 h-100 align-items-start px-1">
                 <div 
-                  v-for="(table, tIdx) in tables" 
+                  v-for="(table, tIdx) in actualTables" 
                   :key="table.id" 
                   class="table-card bg-white rounded-4 shadow-sm border-0 d-flex flex-column"
                 >
@@ -359,20 +359,38 @@
           
           <div class="btn-group btn-group-sm w-100 mb-1">
             <button 
-              class="btn" 
+              class="btn flex-fill" 
               :class="filters.side === 'all' ? 'btn-dark' : 'btn-outline-dark'"
               @click="filters.side = 'all'"
             >Both Sides</button>
             <button 
-              class="btn" 
+              class="btn flex-fill" 
               :class="filters.side === 'bride' ? 'btn-dark' : 'btn-outline-dark'"
               @click="filters.side = 'bride'"
             >Bride</button>
             <button 
-              class="btn" 
+              class="btn flex-fill" 
               :class="filters.side === 'groom' ? 'btn-dark' : 'btn-outline-dark'"
               @click="filters.side = 'groom'"
             >Groom</button>
+          </div>
+
+          <div class="btn-group btn-group-sm w-100 mb-1">
+            <button 
+              class="btn flex-fill" 
+              :class="filters.status === 'all' ? 'btn-dark' : 'btn-outline-dark'"
+              @click="filters.status = 'all'"
+            >All Guests</button>
+            <button 
+              class="btn flex-fill" 
+              :class="filters.status === 'assigned' ? 'btn-dark' : 'btn-outline-dark'"
+              @click="filters.status = 'assigned'"
+            >Assigned</button>
+            <button 
+              class="btn flex-fill" 
+              :class="filters.status === 'unassigned' ? 'btn-dark' : 'btn-outline-dark'"
+              @click="filters.status = 'unassigned'"
+            >Unassigned</button>
           </div>
 
           <div class="rsvp-filters mt-2 px-1">
@@ -526,7 +544,8 @@ const rsvpOptions = ['confirmed', 'definitely', 'likely', 'unlikely']
 const filters = ref({
   search: '',
   side: 'all',
-  rsvp: ['confirmed', 'definitely']
+  rsvp: ['confirmed', 'definitely'],
+  status: 'all'
 })
 
 const editingTableId = ref(null)
@@ -653,7 +672,7 @@ const initTooltips = () => {
 }
 
 // Watch filters or guest list changes to re-init tooltips
-watch([() => filters.value.search, () => filters.value.side, () => filters.value.rsvp], () => {
+watch([() => filters.value.search, () => filters.value.side, () => filters.value.rsvp, () => filters.value.status], () => {
   initTooltips()
 }, { deep: true })
 
@@ -662,7 +681,12 @@ const filteredGuests = computed(() => {
     const nameMatch = (g.firstName + ' ' + g.lastName).toLowerCase().includes(filters.value.search.toLowerCase())
     const sideMatch = filters.value.side === 'all' || g.side === filters.value.side
     const rsvpMatch = filters.value.rsvp.includes(g.rsvp)
-    return nameMatch && sideMatch && rsvpMatch
+    
+    let statusMatch = true
+    if (filters.value.status === 'assigned') statusMatch = !!g.tableId
+    if (filters.value.status === 'unassigned') statusMatch = !g.tableId
+    
+    return nameMatch && sideMatch && rsvpMatch && statusMatch
   })
 })
 
@@ -700,10 +724,11 @@ function capitalize(str) {
 
 function addNewTable(shape = null) {
   const newId = 'table_' + Date.now()
-  const tableCount = tables.value.length + 1
+  const tablesOnlyCount = tables.value.filter(t => !t.type || t.type === 'table').length + 1
+  
   const newTable = {
     id: newId,
-    name: `New Table #${tableCount}`,
+    name: `New Table #${tablesOnlyCount}`,
     capacity: 10,
     assignedGuestIds: []
   }
@@ -712,8 +737,8 @@ function addNewTable(shape = null) {
     newTable.shape = shape
     newTable.x = 20
     newTable.y = 20
-    newTable.width = shape === 'circle' ? 150 : 150
-    newTable.height = shape === 'circle' ? 150 : 100
+    newTable.width = 150
+    newTable.height = shape === 'circle' ? 150 : 120
   }
 
   tables.value.push(newTable)
@@ -721,23 +746,29 @@ function addNewTable(shape = null) {
   
   if (shape) {
     toast.success(`Table added to layout`)
+  } else {
+    toast.success(`New table added to unpositioned strip`)
   }
 }
+
+const actualTables = computed(() => {
+  return tables.value.filter(t => !t.type || t.type === 'table')
+})
 
 const positionedTables = computed(() => {
   return tables.value.filter(t => t.x !== undefined && t.y !== undefined)
 })
 
 const unpositionedTables = computed(() => {
-  return tables.value.filter(t => (t.x === undefined || t.y === undefined) && t.type !== 'item')
+  return tables.value.filter(t => (t.x === undefined || t.y === undefined) && (!t.type || t.type === 'table'))
 })
 
 function placeTable(table, shape) {
   table.shape = shape
   table.x = 20
   table.y = 20
-  table.width = 120
-  table.height = 120
+  table.width = 150
+  table.height = shape === 'circle' ? 150 : 120
   saveSeatingToStore()
   toast.success(`Table placed in layout`)
 }
@@ -836,8 +867,8 @@ function addNewVenueItem(type = 'item', shape = 'rect') {
     shape: shape,
     x: 100,
     y: 100,
-    width: type === 'label' ? 150 : (shape === 'circle' ? 150 : 150),
-    height: type === 'label' ? 100 : (shape === 'circle' ? 150 : 100)
+    width: 150,
+    height: type === 'label' ? 120 : (shape === 'circle' ? 150 : 120)
   }
   tables.value.push(newItem)
   saveSeatingToStore()
